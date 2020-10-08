@@ -55,7 +55,7 @@ const fileExistsSync = (xpath) => fs.existsSync(xpath) && fs.lstatSync(xpath).is
 const directoryExistsSync = (xpath) => fs.existsSync(xpath) && !fs.lstatSync(xpath).isFile()
 const errorExit = (...x) => { console.error(chalk.red('Error:',...x)); process.exit(0) }
 const findCliKey = (keyList = []) => process.argv.find(key => keyList.indexOf(key) > -1)
-const isPrivatePackage = (pkg) => pkg.name && pkg.name.indexOf('@')
+const isPrivatePackage = (pkg) => pkg.name && pkg.name.indexOf('@') === 0;
 const isGitOriginPushExists = async () => {
   const ol = (await spawnAsync('git', ['remote', '-v']))[0];
   return !!ol.split('\n').find(s => s.indexOf('origin') === 0 && s.indexOf('origin') > -1 )
@@ -68,7 +68,7 @@ const writeJson = (pkg, filePath, dryRun) => new Promise(resolve => {
   if(dryRun){ return resolve(filePath) }
   fs.writeFile(filePath, JSON.stringify(pkg, null, '  '), (err) => {
     if (err) { throw err; }
-    resolve();
+    resolve('\n');
   });
 })
 
@@ -135,7 +135,7 @@ async function main(){
 
   await spawnTransaction(
     'Updating "package.json"',
-    writeJson, [pkg, packageJsonPath, dryRun],
+    writeJson, [{ ...pkg, version: nextVersion }, packageJsonPath, dryRun],
   )
 
   const commitName = `[Publish] ${pkg.version}`;

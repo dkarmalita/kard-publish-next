@@ -1,17 +1,29 @@
 {
   "name": "@kard/publish-next",
-  "version": "0.1.0",
+  "version": "0.1.0-alpha.1",
   "description": "",
   "main": "index.js",
   "bin": {
     "ca-tools": "bin/publish-next.js"
   },
   "scripts": {
+    "publish-next": "bin/publish-next.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "semver",
+    "publish"
+  ],
+  "author": "Dmitry Karmalita",
   "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dkarmalita/kard-publish-next.git"
+  },
+  "bugs": {
+    "url": "https://github.com/dkarmalita/kard-publish-next/issues"
+  },
+  "homepage": "https://github.com/dkarmalita/kard-publish-next#readme",
   "dependencies": {
     "chalk": "^4.1.0",
     "cross-spawn": "^7.0.3",
