@@ -128,6 +128,8 @@ async function main(){
     errorExit(`User canseled!`)
   }
 
+  pkg.version = nextVersion;
+
   let forcePublicPackage = false
   if(isPrivatePackage(pkg) && await askUser(`Publish for public access?`)){
     forcePublicPackage = true;
@@ -135,7 +137,7 @@ async function main(){
 
   await spawnTransaction(
     'Updating "package.json"',
-    writeJson, [{ ...pkg, version: nextVersion }, packageJsonPath, dryRun],
+    writeJson, [pkg, packageJsonPath, dryRun],
   )
 
   const commitName = `[Publish] ${pkg.version}`;
