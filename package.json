@@ -1,10 +1,10 @@
 {
   "name": "@kard/publish-next",
-  "version": "0.1.0-alpha.1",
+  "version": "0.1.0-alpha.2",
   "description": "",
   "main": "index.js",
   "bin": {
-    "ca-tools": "bin/publish-next.js"
+    "publish-next": "bin/publish-next.js"
   },
   "scripts": {
     "publish-next": "bin/publish-next.js",
