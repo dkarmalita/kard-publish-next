@@ -1,0 +1,21 @@
+{
+  "name": "@kard/publish-next",
+  "version": "0.1.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "ca-tools": "bin/publish-next.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chalk": "^4.1.0",
+    "cross-spawn": "^7.0.3",
+    "semver": "^7.3.2",
+    "shelljs": "^0.8.4"
+  }
+}
