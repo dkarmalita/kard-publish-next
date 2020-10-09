@@ -119,7 +119,9 @@ async function main(){
   let transactionMsg = ''
 
   if(!await isGitOriginPushExists()){ errorExit(`[Git] remote push is not found`) }
-  if(await isGitEmptyCommit()){ errorExit(`[Git] nothing to commit, working tree clean`) }
+  if(await isGitEmptyCommit() && !await askUser(`Publish without git changes?`)){
+    errorExit(`[Git] nothing to commit, working tree clean`)
+  }
 
   const incType = findCliKey(incTypes) || defaultIncType(currentVersion)
   const nextVersion = incVersion(currentVersion, incType)
