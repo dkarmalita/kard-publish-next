@@ -60,6 +60,10 @@ const isGitOriginPushExists = async () => {
   const ol = (await spawnAsync('git', ['remote', '-v']))[0];
   return !!ol.split('\n').find(s => s.indexOf('origin') === 0 && s.indexOf('origin') > -1 )
 }
+const getLatestPublishedVersion = async (packageName) => {
+  const out = (await spawnAsync('npm', ['view', packageName, 'version']));
+  return out[0].replace(/\n/g, '');
+}
 const isGitEmptyCommit = async () => {
   const ol = (await spawnAsync('git', ['status']))[0];
   return ol.indexOf('nothing to commit') !== -1
@@ -70,6 +74,20 @@ const writeJson = (pkg, filePath, dryRun) => new Promise(resolve => {
     if (err) { throw err; }
     resolve('\n');
   });
+})
+const publish = async (pkg, forcePublic, dryRun) => new Promise(async resolve => {
+  const args = forcePublic ? ['publish','--access public'] : ['publish']
+
+  let spawnOut = []
+  spawnOut = await spawnAsync(dryRun ? 'echo' : 'npm', args);
+  const outMsg = spawnOut[0].substring(0, spawnOut[0].length - 1)
+
+  const latestPublishedVersion = await getLatestPublishedVersion(pkg.name)
+  if(!dryRun && pkg.version !== latestPublishedVersion){
+    throw new Error(`Pablishing of version ${pkg.version} fail. Npm still on ${latestPublishedVersion}`)
+  }
+
+  resolve(outMsg);
 })
 
 // transaction, dryRun
@@ -114,6 +132,7 @@ if(!directoryExistsSync(path.join(process.cwd(), '.git'))){ errorExit(`[Git] rep
 // main
 async function main(){
   const askUser = require('../lib/askUser');
+  const askUserEdit = require('../lib/askUserEdit');
 
   let spawnOut = '';
   let transactionMsg = ''
@@ -123,12 +142,26 @@ async function main(){
     errorExit(`[Git] nothing to commit, working tree clean`)
   }
 
+  const latestPublishedVersion = await getLatestPublishedVersion(pkg.name);
+
+  if(!latestPublishedVersion){
+    errorExit(`[Npm] it looks like the package (${pkg.name}) was not published yet! Please make the initial publish manually.`)
+  }
+
+  if(latestPublishedVersion !== pkg.version){
+    errorExit(`[Npm] latest published version (${latestPublishedVersion}) is different from the currenly pointed in package.json (${pkg.version}).`)
+  }
+// process.exit(0)
+
   const incType = findCliKey(incTypes) || defaultIncType(currentVersion)
   const nextVersion = incVersion(currentVersion, incType)
 
   if(!await askUser(`Publish next version ${nextVersion}?`)){
     errorExit(`User canseled!`)
   }
+
+  // const commitName = await askUserEdit('Confirm commit comment? [yes]/edit',`[Publish] ${nextVersion}`);
+  const commitName = `[Publish] ${nextVersion}`;
 
   pkg.version = nextVersion;
 
@@ -142,7 +175,6 @@ async function main(){
     writeJson, [pkg, packageJsonPath, dryRun],
   )
 
-  const commitName = `[Publish] ${pkg.version}`;
   await spawnTransaction(
     `Staging commit "${commitName}"`,
     'git', ['add', '-A'],
@@ -155,8 +187,13 @@ async function main(){
 
   await spawnTransaction(
     `Publishing version ${pkg.version}`,
-    'npm', forcePublicPackage ? ['publish','--access public'] : ['publish'],
+    publish, [pkg, forcePublicPackage, dryRun],
   )
+
+  // await spawnTransaction(
+  //   `Publishing version ${pkg.version}`,
+  //   'npm', forcePublicPackage ? ['publish','--access public'] : ['publish'],
+  // )
 
   const tagName = `v${pkg.version}`
   await spawnTransaction(
