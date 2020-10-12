@@ -56,6 +56,7 @@ const directoryExistsSync = (xpath) => fs.existsSync(xpath) && !fs.lstatSync(xpa
 const errorExit = (...x) => { console.error(chalk.red('Error:',...x)); process.exit(0) }
 const findCliKey = (keyList = []) => process.argv.find(key => keyList.indexOf(key) > -1)
 const isPrivatePackage = (pkg) => pkg.name && pkg.name.indexOf('@') === 0;
+const timeout = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 const isGitOriginPushExists = async () => {
   const ol = (await spawnAsync('git', ['remote', '-v']))[0];
   return !!ol.split('\n').find(s => s.indexOf('origin') === 0 && s.indexOf('origin') > -1 )
@@ -75,20 +76,22 @@ const writeJson = (pkg, filePath, dryRun) => new Promise(resolve => {
     resolve('\n');
   });
 })
-const publish = async (pkg, forcePublic, dryRun) => new Promise(async resolve => {
-  const args = forcePublic ? ['publish','--access public'] : ['publish']
+// const publish = async (pkg, forcePublic, dryRun) => new Promise(async resolve => {
+//   const args = forcePublic ? ['publish','--access public'] : ['publish']
 
-  let spawnOut = []
-  spawnOut = await spawnAsync(dryRun ? 'echo' : 'npm', args);
-  const outMsg = spawnOut[0].substring(0, spawnOut[0].length - 1)
+//   let spawnOut = []
+//   spawnOut = await spawnAsync(dryRun ? 'echo' : 'npm', args);
+//   const outMsg = spawnOut[0].substring(0, spawnOut[0].length - 1)
 
-  const latestPublishedVersion = await getLatestPublishedVersion(pkg.name)
-  if(!dryRun && pkg.version !== latestPublishedVersion){
-    throw new Error(`Pablishing of version ${pkg.version} fail. Npm still on ${latestPublishedVersion}`)
-  }
+//   await timeout(2000);
 
-  resolve(outMsg);
-})
+//   const latestPublishedVersion = await getLatestPublishedVersion(pkg.name)
+//   if(!dryRun && pkg.version !== latestPublishedVersion){
+//     throw new Error(`Pablishing of version ${pkg.version} fail. Npm still on ${latestPublishedVersion}`)
+//   }
+
+//   resolve(outMsg);
+// })
 
 // transaction, dryRun
 const dryRun = findCliKey('--dryRun');
@@ -180,20 +183,20 @@ async function main(){
     'git', ['add', '-A'],
   )
 
+  // await spawnTransaction(
+  //   `Publishing version ${pkg.version}`,
+  //   publish, [pkg, forcePublicPackage, dryRun],
+  // )
+
+  await spawnTransaction(
+    `Publishing version ${pkg.version}`,
+    'npm', forcePublicPackage ? ['publish','--access public'] : ['publish'],
+  )
+
   await spawnTransaction(
     `Commiting "${commitName}"`,
     'git', ['commit', '-m', commitName],
   )
-
-  await spawnTransaction(
-    `Publishing version ${pkg.version}`,
-    publish, [pkg, forcePublicPackage, dryRun],
-  )
-
-  // await spawnTransaction(
-  //   `Publishing version ${pkg.version}`,
-  //   'npm', forcePublicPackage ? ['publish','--access public'] : ['publish'],
-  // )
 
   const tagName = `v${pkg.version}`
   await spawnTransaction(
