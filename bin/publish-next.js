@@ -70,7 +70,7 @@ const isGitEmptyCommit = async () => {
   return ol.indexOf('nothing to commit') !== -1
 }
 const writeJson = (pkg, filePath, dryRun) => new Promise(resolve => {
-  if(dryRun){ return resolve(filePath) }
+  if(dryRun){ return resolve(`${filePath}\n`) }
   fs.writeFile(filePath, JSON.stringify(pkg, null, '  '), (err) => {
     if (err) { throw err; }
     resolve('\n');
