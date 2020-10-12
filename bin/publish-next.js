@@ -76,22 +76,6 @@ const writeJson = (pkg, filePath, dryRun) => new Promise(resolve => {
     resolve('\n');
   });
 })
-// const publish = async (pkg, forcePublic, dryRun) => new Promise(async resolve => {
-//   const args = forcePublic ? ['publish','--access public'] : ['publish']
-
-//   let spawnOut = []
-//   spawnOut = await spawnAsync(dryRun ? 'echo' : 'npm', args);
-//   const outMsg = spawnOut[0].substring(0, spawnOut[0].length - 1)
-
-//   await timeout(2000);
-
-//   const latestPublishedVersion = await getLatestPublishedVersion(pkg.name)
-//   if(!dryRun && pkg.version !== latestPublishedVersion){
-//     throw new Error(`Pablishing of version ${pkg.version} fail. Npm still on ${latestPublishedVersion}`)
-//   }
-
-//   resolve(outMsg);
-// })
 
 // transaction, dryRun
 const dryRun = findCliKey('--dryRun');
@@ -163,8 +147,8 @@ async function main(){
     errorExit(`User canseled!`)
   }
 
-  // const commitName = await askUserEdit('Confirm commit comment? [yes]/edit',`[Publish] ${nextVersion}`);
-  const commitName = `[Publish] ${nextVersion}`;
+  const commitName = await askUserEdit('Confirm commit comment? [yes]/edit',`[Publish] ${nextVersion}`);
+  // const commitName = `[Publish] ${nextVersion}`;
 
   pkg.version = nextVersion;
 
