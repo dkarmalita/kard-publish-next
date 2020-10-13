@@ -131,14 +131,9 @@ async function main(){
 
   const latestPublishedVersion = await getLatestPublishedVersion(pkg.name);
 
-  if(!latestPublishedVersion){
-    errorExit(`[Npm] it looks like the package (${pkg.name}) was not published yet! Please make the initial publish manually.`)
-  }
-
-  if(latestPublishedVersion !== pkg.version){
+  if(latestPublishedVersion && latestPublishedVersion !== pkg.version){
     errorExit(`[Npm] latest published version (${latestPublishedVersion}) is different from the currenly pointed in package.json (${pkg.version}).`)
   }
-// process.exit(0)
 
   const incType = findCliKey(incTypes) || defaultIncType(currentVersion)
   const nextVersion = incVersion(currentVersion, incType)
@@ -148,7 +143,6 @@ async function main(){
   }
 
   const commitName = await askUserEdit('Confirm commit comment? [yes]/edit',`[Publish] ${nextVersion}`);
-  // const commitName = `[Publish] ${nextVersion}`;
 
   pkg.version = nextVersion;
 
@@ -172,10 +166,10 @@ async function main(){
   //   publish, [pkg, forcePublicPackage, dryRun],
   // )
 
-  await spawnTransaction(
-    `Publishing version ${pkg.version}`,
-    'npm', forcePublicPackage ? ['publish','--access public'] : ['publish'],
-  )
+  // await spawnTransaction(
+  //   `Publishing version ${pkg.version}`,
+  //   'npm', forcePublicPackage ? ['publish','--access public'] : ['publish'],
+  // )
 
   await spawnTransaction(
     `Commiting "${commitName}"`,
